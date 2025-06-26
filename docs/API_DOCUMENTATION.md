@@ -909,3 +909,253 @@ curl -X POST \
   http://localhost:3000/api/stores
 ```
 
+
+
+## Módulo de Gestión de Personas
+
+### Tipos de Identificación
+
+#### GET /api/identification-types
+Lista todos los tipos de identificación con filtros y paginación.
+
+**Autenticación:** Requerida (JWT)
+
+**Parámetros de consulta:**
+- `page` (number, opcional): Número de página (default: 1)
+- `limit` (number, opcional): Elementos por página (default: 10, max: 100)
+- `search` (string, opcional): Búsqueda por nombre o código
+- `sortBy` (string, opcional): Campo para ordenar (default: 'name')
+- `sortOrder` (string, opcional): 'ASC' o 'DESC' (default: 'ASC')
+- `isActive` (boolean, opcional): Filtrar por estado activo
+- `includeStats` (boolean, opcional): Incluir estadísticas de uso
+
+**Ejemplo de respuesta:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Cédula de Ciudadanía",
+      "code": "CC",
+      "description": "Documento de identificación nacional",
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 1,
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+#### POST /api/identification-types
+Crea un nuevo tipo de identificación.
+
+**Autenticación:** Requerida (JWT)
+**Permisos:** Super Admin
+
+**Cuerpo de la solicitud:**
+```json
+{
+  "name": "Pasaporte",
+  "code": "PASS",
+  "description": "Documento de identificación internacional"
+}
+```
+
+### Roles
+
+#### GET /api/roles
+Lista todos los roles con filtros y paginación.
+
+**Autenticación:** Requerida (JWT)
+
+**Parámetros de consulta:** (similares a tipos de identificación)
+
+**Ejemplo de respuesta:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Vendedor",
+      "description": "Rol para personal de ventas",
+      "permissions": {
+        "sales": { "read": true, "write": true },
+        "inventory": { "read": true, "write": false }
+      },
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 1,
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+#### POST /api/roles
+Crea un nuevo rol.
+
+**Autenticación:** Requerida (JWT)
+**Permisos:** Super Admin
+
+**Cuerpo de la solicitud:**
+```json
+{
+  "name": "Cajero",
+  "description": "Rol para personal de caja",
+  "permissions": {
+    "sales": { "read": true, "write": true },
+    "payments": { "read": true, "write": true }
+  }
+}
+```
+
+### Personas
+
+#### GET /api/persons
+Lista todas las personas con filtros y paginación.
+
+**Autenticación:** Requerida (JWT)
+
+**Parámetros de consulta adicionales:**
+- `identificationTypeId` (UUID, opcional): Filtrar por tipo de identificación
+- `includeIdentificationType` (boolean, opcional): Incluir datos del tipo de identificación
+
+**Ejemplo de respuesta:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "identificationTypeId": "uuid",
+      "identificationNumber": "12345678",
+      "firstName": "Juan",
+      "lastName": "Pérez",
+      "email": "juan.perez@example.com",
+      "phone": "+57 300 123 4567",
+      "address": "Calle 123 #45-67",
+      "birthDate": "1990-05-15",
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "identificationType": {
+        "id": "uuid",
+        "name": "Cédula de Ciudadanía",
+        "code": "CC"
+      }
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 1,
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+#### POST /api/persons
+Crea una nueva persona.
+
+**Autenticación:** Requerida (JWT)
+
+**Cuerpo de la solicitud:**
+```json
+{
+  "identificationTypeId": "uuid",
+  "identificationNumber": "87654321",
+  "firstName": "María",
+  "lastName": "González",
+  "email": "maria.gonzalez@example.com",
+  "phone": "+57 300 987 6543",
+  "address": "Carrera 45 #67-89",
+  "birthDate": "1985-08-20"
+}
+```
+
+### Usuarios
+
+#### GET /api/users
+Lista todos los usuarios con filtros y paginación.
+
+**Autenticación:** Requerida (JWT)
+
+**Parámetros de consulta adicionales:**
+- `companyId` (UUID, opcional): Filtrar por compañía
+- `roleId` (UUID, opcional): Filtrar por rol
+- `includeDetails` (boolean, opcional): Incluir datos de persona, compañía y rol
+
+**Ejemplo de respuesta:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "personId": "uuid",
+      "companyId": "uuid",
+      "roleId": "uuid",
+      "username": "juan.perez",
+      "email": "juan.perez@company.com",
+      "isActive": true,
+      "lastLogin": "2024-01-01T10:30:00.000Z",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "person": {
+        "firstName": "Juan",
+        "lastName": "Pérez"
+      },
+      "company": {
+        "name": "StampOut POS Demo"
+      },
+      "role": {
+        "name": "Vendedor"
+      }
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 1,
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+#### POST /api/users
+Crea un nuevo usuario.
+
+**Autenticación:** Requerida (JWT)
+
+**Cuerpo de la solicitud:**
+```json
+{
+  "personId": "uuid",
+  "companyId": "uuid",
+  "roleId": "uuid",
+  "username": "maria.gonzalez",
+  "password": "password123",
+  "email": "maria.gonzalez@company.com"
+}
+```
+
+### Códigos de Respuesta Comunes
+
+- **200 OK**: Operación exitosa
+- **201 Created**: Recurso creado exitosamente
+- **400 Bad Request**: Datos de entrada inválidos
+- **401 Unauthorized**: Token de autenticación requerido
+- **403 Forbidden**: Permisos insuficientes
+- **404 Not Found**: Recurso no encontrado
+- **409 Conflict**: Conflicto de unicidad
+- **500 Internal Server Error**: Error interno del servidor
+

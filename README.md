@@ -6,29 +6,37 @@ Backend del sistema de punto de venta (POS) StampOut construido con NestJS, Post
 
 - ✅ **Autenticación JWT** - Sistema de login seguro con tokens
 - ✅ **Gestión de Organización** - CRUD completo para compañías y tiendas
+- ✅ **Gestión de Personas** - CRUD completo para usuarios, roles y personas
 - ✅ **Control de Acceso** - Autorización basada en roles
 - ✅ **Consultas SQL Puras** - Sin ORM, máximo control sobre la base de datos
 - ✅ **Validaciones Robustas** - Validación en múltiples capas
 - ✅ **Arquitectura Modular** - Código organizado y escalable
 - ✅ **Documentación Completa** - API y módulos documentados
-- ✅ **Pruebas Automatizadas** - Scripts de testing incluidos
+- ✅ **Pruebas Automatizadas** - Scripts de prueba para todos los módulos
 
-## 📋 Módulos Implementados
+## ✨ Funcionalidades Implementadas
 
-### 1. Módulo de Autenticación ✅
+### 🔐 Módulo de Autenticación
 - Login con usuario y contraseña
 - Generación de tokens JWT
 - Middleware de autenticación
 - Protección de rutas
 
-### 2. Módulo de Gestión de Organización ✅
-- **Compañías**: CRUD completo con filtros y paginación
+### 🏢 Módulo de Gestión de Organización
+- **Compañías**: CRUD completo con validaciones
 - **Tiendas**: CRUD completo asociado a compañías
+- Filtros avanzados y paginación
 - Control de acceso por roles
-- Validaciones de integridad
 
-### 3. Próximos Módulos 🔄
-- Gestión de Personas (usuarios, roles, tipos de identificación)
+### 👥 Módulo de Gestión de Personas
+- **Tipos de Identificación**: CRUD completo para documentos
+- **Roles**: CRUD completo con sistema de permisos granular
+- **Personas**: CRUD completo con información personal
+- **Usuarios**: CRUD completo con autenticación y autorización
+- Relaciones complejas entre entidades
+- Validaciones robustas y seguridad avanzada
+
+### 🔄 Próximos Módulos
 - Gestión de Productos (productos, categorías, impuestos)
 - Gestión de Ventas (punto de venta, reportes)
 - Gestión de Inventario (entradas, salidas, ajustes)
@@ -95,175 +103,140 @@ npm run start:prod
 ### Variables de Entorno
 
 ```env
-# Servidor
+# Puerto de la aplicación
 PORT=3000
-NODE_ENV=development
 
-# Base de Datos
+# Base de datos
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
-DB_DATABASE=stampout_pos
+DB_NAME=stampout_pos
 
 # JWT
-JWT_SECRET=tu-jwt-secret-muy-seguro
+JWT_SECRET=tu_jwt_secret_muy_seguro
 JWT_EXPIRES_IN=24h
-
-# API
-API_PREFIX=api
-API_VERSION=1.0.0
-```
-
-### Base de Datos
-
-La aplicación utiliza PostgreSQL con las siguientes tablas principales:
-
-- `companies` - Compañías del sistema
-- `stores` - Tiendas asociadas a compañías
-- `users` - Usuarios del sistema
-- `persons` - Información personal de usuarios
-- `roles` - Roles y permisos
-- `identification_types` - Tipos de identificación
-
-## 🔐 Autenticación
-
-### Login
-
-```bash
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "username": "admin",
-  "password": "admin123"
-}
-```
-
-### Usuario por Defecto
-
-- **Usuario**: `admin`
-- **Contraseña**: `admin123`
-- **Rol**: Super Admin
-
-### Uso del Token
-
-```bash
-Authorization: Bearer <tu-jwt-token>
 ```
 
 ## 📚 API Endpoints
 
 ### Autenticación
 - `POST /api/auth/login` - Iniciar sesión
-- `GET /api/auth/profile` - Obtener perfil del usuario
-- `POST /api/auth/refresh` - Renovar token
 
 ### Compañías
 - `GET /api/companies` - Listar compañías
+- `POST /api/companies` - Crear compañía
 - `GET /api/companies/:id` - Obtener compañía
-- `POST /api/companies` - Crear compañía (Solo Super Admin)
 - `PATCH /api/companies/:id` - Actualizar compañía
-- `DELETE /api/companies/:id` - Eliminar compañía (Solo Super Admin)
+- `DELETE /api/companies/:id` - Eliminar compañía
 
 ### Tiendas
 - `GET /api/stores` - Listar tiendas
-- `GET /api/stores/:id` - Obtener tienda
 - `POST /api/stores` - Crear tienda
+- `GET /api/stores/:id` - Obtener tienda
 - `PATCH /api/stores/:id` - Actualizar tienda
 - `DELETE /api/stores/:id` - Eliminar tienda
 
-### Salud del Sistema
-- `GET /api/health` - Estado del servidor
+### Tipos de Identificación
+- `GET /api/identification-types` - Listar tipos
+- `POST /api/identification-types` - Crear tipo
+- `GET /api/identification-types/:id` - Obtener tipo
+- `PATCH /api/identification-types/:id` - Actualizar tipo
+- `DELETE /api/identification-types/:id` - Eliminar tipo
+
+### Roles
+- `GET /api/roles` - Listar roles
+- `POST /api/roles` - Crear rol
+- `GET /api/roles/:id` - Obtener rol
+- `PATCH /api/roles/:id` - Actualizar rol
+- `DELETE /api/roles/:id` - Eliminar rol
+
+### Personas
+- `GET /api/persons` - Listar personas
+- `POST /api/persons` - Crear persona
+- `GET /api/persons/:id` - Obtener persona
+- `PATCH /api/persons/:id` - Actualizar persona
+- `DELETE /api/persons/:id` - Eliminar persona
+
+### Usuarios
+- `GET /api/users` - Listar usuarios
+- `POST /api/users` - Crear usuario
+- `GET /api/users/:id` - Obtener usuario
+- `PATCH /api/users/:id` - Actualizar usuario
+- `DELETE /api/users/:id` - Eliminar usuario
 
 ## 🧪 Pruebas
 
 ### Ejecutar Pruebas Automatizadas
 
 ```bash
-# Pruebas del módulo de autenticación
-node scripts/test-auth-endpoints.js
-
 # Pruebas del módulo de organización
 node scripts/test-organization-endpoints.js
+
+# Pruebas del módulo de personas
+node scripts/test-people-endpoints.js
 ```
 
-### Pruebas Manuales con cURL
+### Datos de Prueba
 
-```bash
-# Login
-curl -X POST \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}' \
-  http://localhost:3000/api/auth/login
-
-# Listar compañías
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:3000/api/companies
-
-# Crear tienda
-curl -X POST \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
-  -d '{
-    "name": "Mi Tienda",
-    "code": "TIENDA01",
-    "address": "Calle 123"
-  }' \
-  http://localhost:3000/api/stores
-```
+**Usuario por defecto:**
+- Username: `admin`
+- Password: `admin123`
 
 ## 📖 Documentación
 
-- [Guía de Instalación](docs/INSTALLATION_GUIDE.md)
 - [Documentación de API](docs/API_DOCUMENTATION.md)
 - [Módulo de Autenticación](docs/AUTHENTICATION_MODULE.md)
 - [Módulo de Organización](docs/ORGANIZATION_MODULE.md)
+- [Módulo de Personas](docs/PEOPLE_MODULE.md)
+- [Guía de Instalación](docs/INSTALLATION_GUIDE.md)
 
 ## 🏗️ Arquitectura
 
+### Estructura del Proyecto
+
 ```
 src/
-├── auth/                    # Módulo de autenticación
-│   ├── controllers/         # Controladores de auth
-│   ├── services/           # Servicios de auth
-│   ├── guards/             # Guards JWT
-│   ├── dto/                # DTOs de auth
-│   └── interfaces/         # Interfaces de auth
-├── organization/           # Módulo de organización
-│   ├── companies/          # Submódulo de compañías
-│   ├── stores/             # Submódulo de tiendas
-│   └── common/             # DTOs comunes
-├── database/               # Servicios de base de datos
-│   └── services/           # Conexión y consultas
-├── common/                 # Utilidades comunes
-│   ├── decorators/         # Decoradores personalizados
-│   ├── filters/            # Filtros de excepción
-│   └── pipes/              # Pipes de validación
-└── config/                 # Configuración de la app
+├── auth/                 # Módulo de autenticación
+├── organization/         # Módulo de organización
+│   ├── companies/       # Submódulo de compañías
+│   └── stores/          # Submódulo de tiendas
+├── people/              # Módulo de personas
+│   ├── identification-types/  # Tipos de identificación
+│   ├── roles/           # Roles y permisos
+│   ├── persons/         # Información personal
+│   └── users/           # Usuarios del sistema
+├── database/            # Servicios de base de datos
+├── common/              # Utilidades comunes
+└── config/              # Configuración
 ```
+
+### Principios de Diseño
+
+- **Modularidad**: Cada módulo es independiente y reutilizable
+- **Separación de responsabilidades**: Controladores, servicios y DTOs bien definidos
+- **Consultas SQL puras**: Control total sobre las consultas de base de datos
+- **Validaciones en capas**: DTO, servicio y base de datos
+- **Seguridad por defecto**: Autenticación y autorización en todos los endpoints
 
 ## 🔒 Seguridad
 
-### Control de Acceso
+### Medidas Implementadas
 
-- **Super Admin**: Acceso completo a todas las funcionalidades
-- **Admin/Manager**: Acceso limitado a su compañía
-- **Usuario**: Acceso básico según permisos
+- Autenticación JWT obligatoria
+- Autorización basada en roles
+- Validación de permisos por compañía
+- Encriptación de contraseñas con bcrypt
+- Sanitización de datos de entrada
+- Protección contra inyección SQL
+- CORS configurado
 
-### Validaciones
+### Roles del Sistema
 
-- Validación de entrada con class-validator
-- Sanitización de datos
-- Prevención de inyección SQL
-- Tokens JWT seguros
-
-### Mejores Prácticas
-
-- Consultas SQL parametrizadas
-- Soft delete para preservar integridad
-- Timestamps automáticos
-- Validación en múltiples capas
+- **Super Admin**: Acceso completo a todo el sistema
+- **Admin**: Gestión de su compañía y tiendas
+- **Vendedor**: Acceso a ventas e inventario
+- **Cajero**: Acceso limitado a punto de venta
 
 ## 🚀 Despliegue
 
@@ -298,9 +271,11 @@ docker-compose up -d
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
-## 👥 Autores
+## 👨‍💻 Autor
 
-- **Jahan Barraza** - *Desarrollo inicial* - [jahanbarraza](https://github.com/jahanbarraza)
+**Jahan Barraza**
+- GitHub: [@jahanbarraza](https://github.com/jahanbarraza)
+- Email: jahanyu@gmail.com
 
 ## 🙏 Agradecimientos
 
@@ -308,15 +283,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 - PostgreSQL por la robusta base de datos
 - La comunidad de desarrolladores por las mejores prácticas
 
-## 📞 Soporte
-
-Si tienes preguntas o necesitas ayuda:
-
-- 📧 Email: jahanyu@gmail.com
-- 🐛 Issues: [GitHub Issues](https://github.com/jahanbarraza/Tienda_backend_nestjs/issues)
-- 📖 Documentación: [Docs](docs/)
-
 ---
 
-⭐ ¡No olvides dar una estrella al proyecto si te fue útil!
+⭐ ¡No olvides dar una estrella al proyecto si te ha sido útil!
 
