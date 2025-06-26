@@ -1,69 +1,86 @@
 # StampOut POS Backend
 
-Backend del sistema de punto de venta StampOut POS construido con NestJS, PostgreSQL y consultas SQL puras.
+Backend del sistema de punto de venta (POS) StampOut construido con NestJS, PostgreSQL y consultas SQL puras.
 
-## Características
+## 🚀 Características
 
-- ✅ Autenticación JWT
-- ✅ Arquitectura modular
-- ✅ Consultas SQL puras (sin ORM)
-- ✅ Validaciones y sanitización
-- ✅ Middleware de autenticación
-- ✅ Migraciones automáticas
-- ✅ CORS configurado
-- ✅ Variables de entorno
+- ✅ **Autenticación JWT** - Sistema de login seguro con tokens
+- ✅ **Gestión de Organización** - CRUD completo para compañías y tiendas
+- ✅ **Control de Acceso** - Autorización basada en roles
+- ✅ **Consultas SQL Puras** - Sin ORM, máximo control sobre la base de datos
+- ✅ **Validaciones Robustas** - Validación en múltiples capas
+- ✅ **Arquitectura Modular** - Código organizado y escalable
+- ✅ **Documentación Completa** - API y módulos documentados
+- ✅ **Pruebas Automatizadas** - Scripts de testing incluidos
 
-## Requisitos
+## 📋 Módulos Implementados
 
-- Node.js 18+
-- PostgreSQL 12+
+### 1. Módulo de Autenticación ✅
+- Login con usuario y contraseña
+- Generación de tokens JWT
+- Middleware de autenticación
+- Protección de rutas
+
+### 2. Módulo de Gestión de Organización ✅
+- **Compañías**: CRUD completo con filtros y paginación
+- **Tiendas**: CRUD completo asociado a compañías
+- Control de acceso por roles
+- Validaciones de integridad
+
+### 3. Próximos Módulos 🔄
+- Gestión de Personas (usuarios, roles, tipos de identificación)
+- Gestión de Productos (productos, categorías, impuestos)
+- Gestión de Ventas (punto de venta, reportes)
+- Gestión de Inventario (entradas, salidas, ajustes)
+- Reportería (cierre diario, reportes avanzados)
+
+## 🛠️ Tecnologías
+
+- **Framework**: NestJS 10.x
+- **Base de Datos**: PostgreSQL 14+
+- **Autenticación**: JWT + Passport
+- **Validación**: class-validator + class-transformer
+- **Lenguaje**: TypeScript
+- **Consultas**: SQL puro (sin ORM)
+
+## 📦 Instalación
+
+### Prerrequisitos
+
+- Node.js 18+ 
+- PostgreSQL 14+
 - npm o yarn
 
-## Instalación
+### Pasos de Instalación
 
-1. Clonar el repositorio:
+1. **Clonar el repositorio**
 ```bash
-git clone <repository-url>
-cd stampout-pos-backend
+git clone https://github.com/jahanbarraza/Tienda_backend_nestjs.git
+cd Tienda_backend_nestjs
 ```
 
-2. Instalar dependencias:
+2. **Instalar dependencias**
 ```bash
 npm install
 ```
 
-3. Configurar variables de entorno:
+3. **Configurar variables de entorno**
 ```bash
 cp .env.example .env
+# Editar .env con tus configuraciones
 ```
 
-Editar el archivo `.env` con tus configuraciones:
-```env
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_NAME=stampout_pos
+4. **Configurar base de datos**
+```bash
+# Crear base de datos
+createdb stampout_pos
 
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_EXPIRES_IN=24h
-
-# Application Configuration
-PORT=3000
-NODE_ENV=development
-
-# CORS Configuration
-CORS_ORIGIN=http://localhost:3001
+# Ejecutar migraciones
+psql -d stampout_pos -f database/migrations/001_create_auth_tables.sql
+psql -d stampout_pos -f database/migrations/002_insert_initial_data.sql
 ```
 
-4. Crear la base de datos PostgreSQL:
-```sql
-CREATE DATABASE stampout_pos;
-```
-
-5. Ejecutar la aplicación:
+5. **Iniciar la aplicación**
 ```bash
 # Desarrollo
 npm run start:dev
@@ -73,169 +90,233 @@ npm run build
 npm run start:prod
 ```
 
-## Estructura del Proyecto
+## 🔧 Configuración
 
+### Variables de Entorno
+
+```env
+# Servidor
+PORT=3000
+NODE_ENV=development
+
+# Base de Datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=stampout_pos
+
+# JWT
+JWT_SECRET=tu-jwt-secret-muy-seguro
+JWT_EXPIRES_IN=24h
+
+# API
+API_PREFIX=api
+API_VERSION=1.0.0
 ```
-src/
-├── auth/                 # Módulo de autenticación
-│   ├── controllers/      # Controladores
-│   ├── services/         # Servicios
-│   ├── guards/           # Guards y estrategias
-│   ├── dto/              # Data Transfer Objects
-│   └── interfaces/       # Interfaces TypeScript
-├── database/             # Módulo de base de datos
-│   └── services/         # Servicios de DB y migraciones
-├── config/               # Configuración
-├── common/               # Utilidades compartidas
-│   └── decorators/       # Decoradores personalizados
-└── main.ts              # Punto de entrada
-```
 
-## API Endpoints
+### Base de Datos
 
-### Autenticación
+La aplicación utiliza PostgreSQL con las siguientes tablas principales:
 
-#### POST /api/auth/login
-Iniciar sesión con usuario y contraseña.
+- `companies` - Compañías del sistema
+- `stores` - Tiendas asociadas a compañías
+- `users` - Usuarios del sistema
+- `persons` - Información personal de usuarios
+- `roles` - Roles y permisos
+- `identification_types` - Tipos de identificación
 
-**Request:**
-```json
+## 🔐 Autenticación
+
+### Login
+
+```bash
+POST /api/auth/login
+Content-Type: application/json
+
 {
   "username": "admin",
   "password": "admin123"
 }
 ```
 
-**Response:**
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "uuid",
-    "username": "admin",
-    "email": "admin@stampoutpos.com",
-    "person": {
-      "firstName": "Admin",
-      "lastName": "Sistema"
-    },
-    "company": {
-      "id": "uuid",
-      "name": "StampOut POS Demo"
-    },
-    "role": {
-      "id": "uuid",
-      "name": "Super Admin",
-      "permissions": {"all": true}
-    }
-  }
-}
+### Usuario por Defecto
+
+- **Usuario**: `admin`
+- **Contraseña**: `admin123`
+- **Rol**: Super Admin
+
+### Uso del Token
+
+```bash
+Authorization: Bearer <tu-jwt-token>
 ```
 
-#### GET /api/auth/profile
-Obtener perfil del usuario autenticado.
+## 📚 API Endpoints
 
-**Headers:**
-```
-Authorization: Bearer <token>
-```
+### Autenticación
+- `POST /api/auth/login` - Iniciar sesión
+- `GET /api/auth/profile` - Obtener perfil del usuario
+- `POST /api/auth/refresh` - Renovar token
 
-#### GET /api/auth/validate
-Validar token de acceso.
+### Compañías
+- `GET /api/companies` - Listar compañías
+- `GET /api/companies/:id` - Obtener compañía
+- `POST /api/companies` - Crear compañía (Solo Super Admin)
+- `PATCH /api/companies/:id` - Actualizar compañía
+- `DELETE /api/companies/:id` - Eliminar compañía (Solo Super Admin)
 
-#### POST /api/auth/logout
-Cerrar sesión.
+### Tiendas
+- `GET /api/stores` - Listar tiendas
+- `GET /api/stores/:id` - Obtener tienda
+- `POST /api/stores` - Crear tienda
+- `PATCH /api/stores/:id` - Actualizar tienda
+- `DELETE /api/stores/:id` - Eliminar tienda
 
 ### Salud del Sistema
+- `GET /api/health` - Estado del servidor
 
-#### GET /api/health
-Verificar estado del sistema.
+## 🧪 Pruebas
 
-**Response:**
-```json
-{
-  "status": "ok",
-  "timestamp": "2024-01-01T00:00:00.000Z",
-  "service": "StampOut POS Backend",
-  "version": "1.0.0"
-}
-```
-
-## Usuario por Defecto
-
-El sistema incluye un usuario administrador por defecto:
-
-- **Usuario:** admin
-- **Contraseña:** admin123
-- **Email:** admin@stampoutpos.com
-
-## Base de Datos
-
-### Tablas Principales
-
-- `identification_types` - Tipos de identificación
-- `companies` - Compañías
-- `stores` - Tiendas
-- `roles` - Roles de usuario
-- `persons` - Personas
-- `users` - Usuarios del sistema
-- `user_sessions` - Sesiones de usuario
-
-### Migraciones
-
-Las migraciones se ejecutan automáticamente al iniciar la aplicación. Los archivos están en:
-- `database/migrations/001_create_auth_tables.sql`
-- `database/migrations/002_insert_initial_data.sql`
-
-## Desarrollo
-
-### Comandos Disponibles
+### Ejecutar Pruebas Automatizadas
 
 ```bash
-# Desarrollo con hot reload
-npm run start:dev
+# Pruebas del módulo de autenticación
+node scripts/test-auth-endpoints.js
 
-# Construcción
-npm run build
-
-# Producción
-npm run start:prod
-
-# Linting
-npm run lint
-
-# Formateo
-npm run format
-
-# Pruebas
-npm run test
-npm run test:e2e
+# Pruebas del módulo de organización
+node scripts/test-organization-endpoints.js
 ```
 
-### Generar Hash de Contraseña
+### Pruebas Manuales con cURL
 
 ```bash
-node scripts/generate-password-hash.js
+# Login
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin123"}' \
+  http://localhost:3000/api/auth/login
+
+# Listar compañías
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:3000/api/companies
+
+# Crear tienda
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{
+    "name": "Mi Tienda",
+    "code": "TIENDA01",
+    "address": "Calle 123"
+  }' \
+  http://localhost:3000/api/stores
 ```
 
-## Seguridad
+## 📖 Documentación
 
-- Contraseñas hasheadas con bcrypt
-- Tokens JWT con expiración
+- [Guía de Instalación](docs/INSTALLATION_GUIDE.md)
+- [Documentación de API](docs/API_DOCUMENTATION.md)
+- [Módulo de Autenticación](docs/AUTHENTICATION_MODULE.md)
+- [Módulo de Organización](docs/ORGANIZATION_MODULE.md)
+
+## 🏗️ Arquitectura
+
+```
+src/
+├── auth/                    # Módulo de autenticación
+│   ├── controllers/         # Controladores de auth
+│   ├── services/           # Servicios de auth
+│   ├── guards/             # Guards JWT
+│   ├── dto/                # DTOs de auth
+│   └── interfaces/         # Interfaces de auth
+├── organization/           # Módulo de organización
+│   ├── companies/          # Submódulo de compañías
+│   ├── stores/             # Submódulo de tiendas
+│   └── common/             # DTOs comunes
+├── database/               # Servicios de base de datos
+│   └── services/           # Conexión y consultas
+├── common/                 # Utilidades comunes
+│   ├── decorators/         # Decoradores personalizados
+│   ├── filters/            # Filtros de excepción
+│   └── pipes/              # Pipes de validación
+└── config/                 # Configuración de la app
+```
+
+## 🔒 Seguridad
+
+### Control de Acceso
+
+- **Super Admin**: Acceso completo a todas las funcionalidades
+- **Admin/Manager**: Acceso limitado a su compañía
+- **Usuario**: Acceso básico según permisos
+
+### Validaciones
+
 - Validación de entrada con class-validator
-- Sanitización automática
-- CORS configurado
-- Guards de autenticación
+- Sanitización de datos
+- Prevención de inyección SQL
+- Tokens JWT seguros
 
-## Próximos Módulos
+### Mejores Prácticas
 
-1. Gestión de Organización (Compañías y Tiendas)
-2. Gestión de Personas (Personas, Usuarios, Roles)
-3. Gestión de Productos (Productos, Categorías, Impuestos)
-4. Gestión de Ventas (POS, Reportes)
-5. Gestión de Inventario (Entradas, Salidas, Ajustes)
-6. Reportería (Cierres diarios)
+- Consultas SQL parametrizadas
+- Soft delete para preservar integridad
+- Timestamps automáticos
+- Validación en múltiples capas
 
-## Licencia
+## 🚀 Despliegue
 
-MIT
+### Desarrollo
+
+```bash
+npm run start:dev
+```
+
+### Producción
+
+```bash
+npm run build
+npm run start:prod
+```
+
+### Docker (Próximamente)
+
+```bash
+docker-compose up -d
+```
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📝 Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+
+## 👥 Autores
+
+- **Jahan Barraza** - *Desarrollo inicial* - [jahanbarraza](https://github.com/jahanbarraza)
+
+## 🙏 Agradecimientos
+
+- NestJS por el excelente framework
+- PostgreSQL por la robusta base de datos
+- La comunidad de desarrolladores por las mejores prácticas
+
+## 📞 Soporte
+
+Si tienes preguntas o necesitas ayuda:
+
+- 📧 Email: jahanyu@gmail.com
+- 🐛 Issues: [GitHub Issues](https://github.com/jahanbarraza/Tienda_backend_nestjs/issues)
+- 📖 Documentación: [Docs](docs/)
+
+---
+
+⭐ ¡No olvides dar una estrella al proyecto si te fue útil!
 

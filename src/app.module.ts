@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
+import { OrganizationModule } from './organization/organization.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 
@@ -16,6 +17,7 @@ import configuration from './config/configuration';
     }),
     DatabaseModule,
     AuthModule,
+    OrganizationModule,
   ],
   controllers: [AppController],
   providers: [

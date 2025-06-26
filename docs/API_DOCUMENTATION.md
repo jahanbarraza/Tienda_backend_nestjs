@@ -546,3 +546,366 @@ Para soporte de la API:
 3. Crear issue en GitHub
 4. Contactar al equipo de desarrollo
 
+
+
+## Módulo de Gestión de Organización
+
+### Compañías
+
+#### GET /api/companies
+Listar compañías con filtros y paginación.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Query Parameters:**
+- `page` (number, opcional): Página (default: 1)
+- `limit` (number, opcional): Límite por página (default: 10, max: 100)
+- `search` (string, opcional): Búsqueda en nombre, tax_id, email
+- `isActive` (boolean, opcional): Filtrar por estado activo
+- `createdFrom` (string, opcional): Fecha desde (ISO string)
+- `createdTo` (string, opcional): Fecha hasta (ISO string)
+- `includeStats` (boolean, opcional): Incluir estadísticas (default: false)
+- `sortBy` (string, opcional): Campo de ordenamiento
+- `sortOrder` (string, opcional): Orden ASC|DESC (default: ASC)
+
+**Response (200):**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "StampOut POS Demo",
+      "taxId": "900123456-1",
+      "email": "demo@stampoutpos.com",
+      "phone": "+57 300 123 4567",
+      "address": "Calle 123 #45-67, Bogotá, Colombia",
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "storesCount": 5,
+      "usersCount": 10
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 1,
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+#### GET /api/companies/:id
+Obtener una compañía específica.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (200):**
+```json
+{
+  "id": "uuid",
+  "name": "StampOut POS Demo",
+  "taxId": "900123456-1",
+  "email": "demo@stampoutpos.com",
+  "phone": "+57 300 123 4567",
+  "address": "Calle 123 #45-67, Bogotá, Colombia",
+  "isActive": true,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "storesCount": 5,
+  "usersCount": 10
+}
+```
+
+#### POST /api/companies
+Crear nueva compañía (Solo Super Admin).
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Mi Nueva Empresa",
+  "taxId": "900123456-7",
+  "email": "contacto@miempresa.com",
+  "phone": "+57 300 123 4567",
+  "address": "Calle 123 #45-67"
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": "uuid",
+  "name": "Mi Nueva Empresa",
+  "taxId": "900123456-7",
+  "email": "contacto@miempresa.com",
+  "phone": "+57 300 123 4567",
+  "address": "Calle 123 #45-67",
+  "isActive": true,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### PATCH /api/companies/:id
+Actualizar compañía existente.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Empresa Actualizada",
+  "phone": "+57 300 999 8888",
+  "isActive": true
+}
+```
+
+**Response (200):** CompanyResponse
+
+#### DELETE /api/companies/:id
+Eliminar compañía (Soft delete, Solo Super Admin).
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (204):** No Content
+
+### Tiendas
+
+#### GET /api/stores
+Listar tiendas con filtros y paginación.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Query Parameters:**
+- `page` (number, opcional): Página (default: 1)
+- `limit` (number, opcional): Límite por página (default: 10, max: 100)
+- `search` (string, opcional): Búsqueda en nombre, código, dirección
+- `companyId` (string, opcional): Filtrar por compañía (Solo Super Admin)
+- `isActive` (boolean, opcional): Filtrar por estado activo
+- `createdFrom` (string, opcional): Fecha desde (ISO string)
+- `createdTo` (string, opcional): Fecha hasta (ISO string)
+- `includeStats` (boolean, opcional): Incluir estadísticas (default: false)
+- `includeCompany` (boolean, opcional): Incluir datos de compañía (default: true)
+- `sortBy` (string, opcional): Campo de ordenamiento
+- `sortOrder` (string, opcional): Orden ASC|DESC (default: ASC)
+
+**Response (200):**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "companyId": "uuid",
+      "name": "Tienda Principal",
+      "code": "MAIN",
+      "address": "Calle 123 #45-67, Bogotá, Colombia",
+      "phone": "+57 300 123 4567",
+      "email": "tienda@stampoutpos.com",
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "company": {
+        "id": "uuid",
+        "name": "StampOut POS Demo"
+      },
+      "usersCount": 5
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 1,
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+#### GET /api/stores/:id
+Obtener una tienda específica.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (200):**
+```json
+{
+  "id": "uuid",
+  "companyId": "uuid",
+  "name": "Tienda Principal",
+  "code": "MAIN",
+  "address": "Calle 123 #45-67, Bogotá, Colombia",
+  "phone": "+57 300 123 4567",
+  "email": "tienda@stampoutpos.com",
+  "isActive": true,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "company": {
+    "id": "uuid",
+    "name": "StampOut POS Demo"
+  },
+  "usersCount": 5
+}
+```
+
+#### POST /api/stores
+Crear nueva tienda.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "companyId": "uuid",
+  "name": "Tienda Centro",
+  "code": "CENTRO01",
+  "address": "Centro Comercial Plaza",
+  "phone": "+57 300 987 6543",
+  "email": "centro@miempresa.com"
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": "uuid",
+  "companyId": "uuid",
+  "name": "Tienda Centro",
+  "code": "CENTRO01",
+  "address": "Centro Comercial Plaza",
+  "phone": "+57 300 987 6543",
+  "email": "centro@miempresa.com",
+  "isActive": true,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### PATCH /api/stores/:id
+Actualizar tienda existente.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Tienda Centro Actualizada",
+  "phone": "+57 300 111 2222",
+  "isActive": true
+}
+```
+
+**Response (200):** StoreResponse
+
+#### DELETE /api/stores/:id
+Eliminar tienda (Soft delete).
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (204):** No Content
+
+### Códigos de Error Específicos
+
+#### 409 - Conflict
+```json
+{
+  "statusCode": 409,
+  "message": "Ya existe una compañía con este NIT/Tax ID",
+  "error": "Conflict"
+}
+```
+
+```json
+{
+  "statusCode": 409,
+  "message": "Ya existe una tienda con este código en la compañía",
+  "error": "Conflict"
+}
+```
+
+```json
+{
+  "statusCode": 409,
+  "message": "No se puede eliminar la compañía porque tiene tiendas o usuarios activos",
+  "error": "Conflict"
+}
+```
+
+### Ejemplos de Uso
+
+#### Listar compañías con estadísticas
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:3000/api/companies?includeStats=true&page=1&limit=10"
+```
+
+#### Buscar tiendas por nombre
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:3000/api/stores?search=principal&includeCompany=true"
+```
+
+#### Crear nueva compañía
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "name": "Mi Empresa",
+    "taxId": "900123456-7",
+    "email": "contacto@miempresa.com",
+    "phone": "+57 300 123 4567",
+    "address": "Calle 123 #45-67"
+  }' \
+  http://localhost:3000/api/companies
+```
+
+#### Crear nueva tienda
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "name": "Tienda Norte",
+    "code": "NORTE01",
+    "address": "Centro Comercial Norte",
+    "phone": "+57 300 555 6666",
+    "email": "norte@miempresa.com"
+  }' \
+  http://localhost:3000/api/stores
+```
+
