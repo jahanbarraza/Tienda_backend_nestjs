@@ -15,7 +15,7 @@ export class ProductsService {
 
     // Check if category exists and belongs to the company
     const categoryExists = await this.databaseService.query<any>(
-      `SELECT id FROM product_categories WHERE id = $1 AND company_id = $2 AND deleted_at IS NULL`,
+      `SELECT id FROM categories WHERE id = $1 AND company_id = $2 AND is_active = true`,
       [category_id, companyId]
     );
     if (categoryExists.rows.length === 0) {
@@ -25,7 +25,7 @@ export class ProductsService {
     // Check if subcategory exists and belongs to the category and company
     if (subcategory_id) {
       const subcategoryExists = await this.databaseService.query<any>(
-        `SELECT id FROM product_subcategories WHERE id = $1 AND category_id = $2 AND company_id = $3 AND deleted_at IS NULL`,
+        `SELECT id FROM subcategories WHERE id = $1 AND category_id = $2 AND company_id = $3 AND is_active = true`,
         [subcategory_id, category_id, companyId]
       );
       if (subcategoryExists.rows.length === 0) {
@@ -35,7 +35,7 @@ export class ProductsService {
 
     // Check if product SKU already exists for this company
     const existingProductSku = await this.databaseService.query<Product>(
-      `SELECT * FROM products WHERE company_id = $1 AND sku = $2 AND deleted_at IS NULL`,
+      `SELECT * FROM products WHERE company_id = $1 AND sku = $2`,
       [companyId, sku]
     );
 
@@ -44,8 +44,8 @@ export class ProductsService {
     }
 
     const result = await this.databaseService.query<Product>(
-      `INSERT INTO products (company_id, category_id, subcategory_id, name, description, sku, price, cost, stock, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      `INSERT INTO products (company_id, category_id, subcategory_id, name, description, sku, price, cost, stock, is_active, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *`,
       [companyId, category_id, subcategory_id, name, description, sku, price, cost, stock, is_active]
     );
     return result.rows[0];
@@ -54,7 +54,7 @@ export class ProductsService {
   async findAll(query: QueryProductDto, companyId: string): Promise<PaginationResult<Product>> {
     const { page = 1, limit = 10, name, is_active, category_id, subcategory_id } = query;
     const offset = (page - 1) * limit;
-    let filterQuery = `WHERE p.company_id = $1 AND p.deleted_at IS NULL`;
+    let filterQuery = `WHERE p.company_id = $1`;
     const params: any[] = [companyId];
     let paramIndex = 2;
 
@@ -83,9 +83,9 @@ export class ProductsService {
 
     const data = await this.databaseService.query<Product>(
       `SELECT p.*, c.name as category_name, s.name as subcategory_name FROM products p
-       JOIN product_categories c ON p.category_id = c.id
-       LEFT JOIN product_subcategories s ON p.subcategory_id = s.id
-       ${filterQuery} ORDER BY p.name ASC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
+       JOIN categories c ON p.category_id = c.id
+       LEFT JOIN subcategories s ON p.subcategory_id = s.id
+       ${filterQuery} ORDER BY p.created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
       [...params, limit, offset]
     );
 
@@ -100,9 +100,9 @@ export class ProductsService {
   async findOne(id: string, companyId: string): Promise<Product> {
     const result = await this.databaseService.query<Product>(
       `SELECT p.*, c.name as category_name, s.name as subcategory_name FROM products p
-       JOIN product_categories c ON p.category_id = c.id
-       LEFT JOIN product_subcategories s ON p.subcategory_id = s.id
-       WHERE p.id = $1 AND p.company_id = $2 AND p.deleted_at IS NULL`,
+       JOIN categories c ON p.category_id = c.id
+       LEFT JOIN subcategories s ON p.subcategory_id = s.id
+       WHERE p.id = $1 AND p.company_id = $2`,
       [id, companyId]
     );
     if (result.rows.length === 0) {
@@ -116,7 +116,7 @@ export class ProductsService {
 
     if (updateProductDto.category_id && updateProductDto.category_id !== existingProduct.category_id) {
       const categoryExists = await this.databaseService.query<any>(
-        `SELECT id FROM product_categories WHERE id = $1 AND company_id = $2 AND deleted_at IS NULL`,
+        `SELECT id FROM categories WHERE id = $1 AND company_id = $2 AND is_active = true`,
         [updateProductDto.category_id, companyId]
       );
       if (categoryExists.rows.length === 0) {
@@ -126,7 +126,7 @@ export class ProductsService {
 
     if (updateProductDto.subcategory_id && updateProductDto.subcategory_id !== existingProduct.subcategory_id) {
       const subcategoryExists = await this.databaseService.query<any>(
-        `SELECT id FROM product_subcategories WHERE id = $1 AND category_id = $2 AND company_id = $3 AND deleted_at IS NULL`,
+        `SELECT id FROM subcategories WHERE id = $1 AND category_id = $2 AND company_id = $3 AND is_active = true`,
         [updateProductDto.subcategory_id, updateProductDto.category_id || existingProduct.category_id, companyId]
       );
       if (subcategoryExists.rows.length === 0) {
@@ -136,7 +136,7 @@ export class ProductsService {
 
     if (updateProductDto.sku && updateProductDto.sku !== existingProduct.sku) {
       const skuExists = await this.databaseService.query<Product>(
-        `SELECT * FROM products WHERE company_id = $1 AND sku = $2 AND id != $3 AND deleted_at IS NULL`,
+        `SELECT * FROM products WHERE company_id = $1 AND sku = $2 AND id != $3`,
         [companyId, updateProductDto.sku, id]
       );
       if (skuExists.rows.length > 0) {
@@ -189,12 +189,15 @@ export class ProductsService {
       throw new BadRequestException("No fields to update.");
     }
 
+    // Add updated_at field
+    updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
+
     // Add id and companyId to the end of updateValues for the WHERE clause
     updateValues.push(id, companyId);
 
     const result = await this.databaseService.query<Product>(
-      `UPDATE products SET ${updateFields.join(', ')}, updated_at = NOW()
-       WHERE id = $${paramIndex++} AND company_id = $${paramIndex++} AND deleted_at IS NULL RETURNING *`,
+      `UPDATE products SET ${updateFields.join(', ')}
+       WHERE id = $${paramIndex++} AND company_id = $${paramIndex++} RETURNING *`,
       [...updateValues]
     );
 
@@ -206,13 +209,12 @@ export class ProductsService {
 
   async remove(id: string, companyId: string): Promise<void> {
     const result = await this.databaseService.query<Product>(
-      `UPDATE products SET deleted_at = NOW() WHERE id = $1 AND company_id = $2 AND deleted_at IS NULL RETURNING id`,
+      `DELETE FROM products WHERE id = $1 AND company_id = $2 RETURNING id`,
       [id, companyId]
     );
     if (result.rows.length === 0) {
-      throw new NotFoundException(`Product with ID ${id} not found or already deleted for this company.`);
+      throw new NotFoundException(`Product with ID ${id} not found for this company.`);
     }
   }
 }
-
 
