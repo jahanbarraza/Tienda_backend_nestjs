@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { OrganizationModule } from './organization/organization.module';
 import { PeopleModule } from './people/people.module';
+import { ProductsModule } from './products/products.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 
@@ -20,6 +21,7 @@ import configuration from './config/configuration';
     AuthModule,
     OrganizationModule,
     PeopleModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -31,4 +33,5 @@ import configuration from './config/configuration';
   ],
 })
 export class AppModule {}
+
 
