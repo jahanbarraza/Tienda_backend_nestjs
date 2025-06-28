@@ -6,6 +6,7 @@ import { QueryCompanyDto } from '../dto/query-company.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination.dto';
 import { Company, CompanyWithStats, CompanyResponse } from '../interfaces/company.interface';
 import { UserWithDetails } from '../../../auth/interfaces/auth.interface';
+import { PoolClient } from 'pg';
 
 @Injectable()
 export class CompaniesService {
@@ -117,11 +118,11 @@ export class CompaniesService {
     // Ejecutar consultas
     const [dataResult, countResult] = await Promise.all([
       this.databaseService.query(dataQuery, [...params, limit, offset]),
-      this.databaseService.query(countQuery, params),
+      this.databaseService.queryCount(countQuery, params),
     ]);
 
     const companies = dataResult.rows.map(row => this.mapToResponse(row, includeStats));
-    const total = parseInt(countResult.rows[0].total);
+    const total = parseInt(countResult.rows[0].total as any as string);
 
     return new PaginationResponseDto(companies, total, page, limit);
   }
@@ -261,8 +262,8 @@ export class CompaniesService {
     const { rows } = await this.databaseService.query(checkQuery, [id]);
     
     if (rows.length > 0) {
-      const { stores_count, users_count } = rows[0];
-      if (parseInt(stores_count) > 0 || parseInt(users_count) > 0) {
+      const { stores_count, users_count } = rows[0] as CompanyWithStats;
+      if (parseInt(stores_count as unknown as string) > 0 || parseInt(users_count as unknown as string) > 0) {
         throw new ConflictException('No se puede eliminar la compañía porque tiene tiendas o usuarios activos');
       }
     }
@@ -277,7 +278,7 @@ export class CompaniesService {
   private async findByTaxId(taxId: string): Promise<Company | null> {
     const query = 'SELECT * FROM companies WHERE tax_id = $1 AND is_active = true';
     const { rows } = await this.databaseService.query(query, [taxId]);
-    return rows.length > 0 ? rows[0] : null;
+    return rows.length > 0 ? (rows[0] as Company) : null;
   }
 
   private mapToResponse(row: any, includeStats: boolean = false): CompanyResponse {

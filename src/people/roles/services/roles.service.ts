@@ -108,11 +108,11 @@ export class RolesService {
     // Ejecutar consultas
     const [dataResult, countResult] = await Promise.all([
       this.databaseService.query(dataQuery, [...params, limit, offset]),
-      this.databaseService.query(countQuery, params),
+      this.databaseService.queryCount(countQuery, params),
     ]);
 
     const roles = dataResult.rows.map(row => this.mapToResponse(row, includeStats));
-    const total = parseInt(countResult.rows[0].total);
+    const total = parseInt(countResult.rows[0].total as any as string);
 
     return new PaginationResponseDto(roles, total, page, limit);
   }
@@ -229,7 +229,7 @@ export class RolesService {
 
     const { rows } = await this.databaseService.query(checkQuery, [id]);
     
-    if (parseInt(rows[0].users_count) > 0) {
+    if (parseInt((rows[0] as any).users_count) > 0) {
       throw new ConflictException('No se puede eliminar el rol porque tiene usuarios asociados');
     }
 
@@ -243,7 +243,7 @@ export class RolesService {
   private async findByName(name: string): Promise<Role | null> {
     const query = 'SELECT * FROM roles WHERE name = $1 AND is_active = true';
     const { rows } = await this.databaseService.query(query, [name]);
-    return rows.length > 0 ? rows[0] : null;
+    return rows.length > 0 ? (rows[0] as Role) : null;
   }
 
   private mapToResponse(row: any, includeStats: boolean = false): RoleResponse {

@@ -108,11 +108,11 @@ export class IdentificationTypesService {
     // Ejecutar consultas
     const [dataResult, countResult] = await Promise.all([
       this.databaseService.query(dataQuery, [...params, limit, offset]),
-      this.databaseService.query(countQuery, params),
+      this.databaseService.queryCount(countQuery, params),
     ]);
 
     const identificationTypes = dataResult.rows.map(row => this.mapToResponse(row, includeStats));
-    const total = parseInt(countResult.rows[0].total);
+    const total = parseInt(countResult.rows[0].total as any as string);
 
     return new PaginationResponseDto(identificationTypes, total, page, limit);
   }
@@ -223,7 +223,7 @@ export class IdentificationTypesService {
 
     const { rows } = await this.databaseService.query(checkQuery, [id]);
     
-    if (parseInt(rows[0].persons_count) > 0) {
+    if (parseInt((rows[0] as any).persons_count) > 0) {
       throw new ConflictException('No se puede eliminar el tipo de identificación porque tiene personas asociadas');
     }
 
@@ -237,7 +237,7 @@ export class IdentificationTypesService {
   private async findByCode(code: string): Promise<IdentificationType | null> {
     const query = 'SELECT * FROM identification_types WHERE code = $1 AND is_active = true';
     const { rows } = await this.databaseService.query(query, [code]);
-    return rows.length > 0 ? rows[0] : null;
+    return rows.length > 0 ? (rows[0] as IdentificationType) : null;
   }
 
   private mapToResponse(row: any, includeStats: boolean = false): IdentificationTypeResponse {

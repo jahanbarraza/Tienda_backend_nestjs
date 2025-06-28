@@ -146,11 +146,11 @@ export class StoresService {
     // Ejecutar consultas
     const [dataResult, countResult] = await Promise.all([
       this.databaseService.query(dataQuery, [...params, limit, offset]),
-      this.databaseService.query(countQuery, params),
+      this.databaseService.queryCount(countQuery, params),
     ]);
 
     const stores = dataResult.rows.map(row => this.mapToResponse(row, includeCompany, includeStats));
-    const total = parseInt(countResult.rows[0].total);
+    const total = parseInt(countResult.rows[0].total as any as string);
 
     return new PaginationResponseDto(stores, total, page, limit);
   }
@@ -275,7 +275,7 @@ export class StoresService {
 
     const { rows } = await this.databaseService.query(checkQuery, [id]);
     
-    if (parseInt(rows[0].users_count) > 0) {
+    if (parseInt((rows[0] as any).users_count) > 0) {
       throw new ConflictException('No se puede eliminar la tienda porque tiene usuarios activos asociados');
     }
 
@@ -289,7 +289,7 @@ export class StoresService {
   private async findByCompanyAndCode(companyId: string, code: string): Promise<Store | null> {
     const query = 'SELECT * FROM stores WHERE company_id = $1 AND code = $2 AND is_active = true';
     const { rows } = await this.databaseService.query(query, [companyId, code]);
-    return rows.length > 0 ? rows[0] : null;
+    return rows.length > 0 ? (rows[0] as Store) : null;
   }
 
   private async validateCompanyAccess(companyId: string, user: UserWithDetails): Promise<void> {

@@ -3,7 +3,7 @@ import { DatabaseService } from '../../../database/services/database.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { QueryUserDto } from '../dto/query-user.dto';
-import { PaginationResponseDto } from '../../../organization/common/dto/pagination.dto';
+import { PaginationDto, PaginationResponseDto } from '../../../common/dto/pagination.dto';
 import { User, UserResponse } from '../interfaces/user.interface';
 import { UserWithDetails } from '../../../auth/interfaces/auth.interface';
 import * as bcrypt from 'bcryptjs';
@@ -31,9 +31,9 @@ export class UsersService {
 
     // Verificar que la persona existe y no tiene usuario activo
     const personQuery = 'SELECT id FROM persons WHERE id = $1 AND is_active = true';
-    const { rows: personRows } = await this.databaseService.query(personQuery, [personId]);
+    const personResult = await this.databaseService.query(personQuery, [personId]);
     
-    if (personRows.length === 0) {
+    if (personResult.rows.length === 0) {
       throw new NotFoundException('Persona no encontrada');
     }
 
@@ -45,17 +45,17 @@ export class UsersService {
 
     // Verificar que la compañía existe
     const companyQuery = 'SELECT id FROM companies WHERE id = $1 AND is_active = true';
-    const { rows: companyRows } = await this.databaseService.query(companyQuery, [targetCompanyId]);
+    const companyResult = await this.databaseService.query(companyQuery, [targetCompanyId]);
     
-    if (companyRows.length === 0) {
+    if (companyResult.rows.length === 0) {
       throw new NotFoundException('Compañía no encontrada');
     }
 
     // Verificar que el rol existe
     const roleQuery = 'SELECT id FROM roles WHERE id = $1 AND is_active = true';
-    const { rows: roleRows } = await this.databaseService.query(roleQuery, [roleId]);
+    const roleResult = await this.databaseService.query(roleQuery, [roleId]);
     
-    if (roleRows.length === 0) {
+    if (roleResult.rows.length === 0) {
       throw new NotFoundException('Rol no encontrado');
     }
 
@@ -68,7 +68,7 @@ export class UsersService {
       RETURNING id, person_id, company_id, role_id, username, email, is_active, created_at, updated_at
     `;
 
-    const { rows } = await this.databaseService.query(query, [
+    const result = await this.databaseService.query(query, [
       personId,
       targetCompanyId,
       roleId,
@@ -77,7 +77,7 @@ export class UsersService {
       email || null,
     ]);
 
-    return this.mapToResponse(rows[0]);
+    return this.mapToResponse(result.rows[0]);
   }
 
   async findAll(queryDto: QueryUserDto, currentUser: UserWithDetails): Promise<PaginationResponseDto<UserResponse>> {
@@ -102,7 +102,7 @@ export class UsersService {
     let paramIndex = 1;
 
     // Control de acceso: Solo Super Admin puede ver usuarios de todas las compañías
-    if (currentUser.role.name !== 'Super Admin') {
+    if (currentUser.role.name !== 'Super Admin' && companyId === undefined) {
       conditions.push(`u.company_id = $${paramIndex}`);
       params.push(currentUser.company_id);
       paramIndex++;
@@ -180,15 +180,13 @@ export class UsersService {
     `;
 
     // Ejecutar consultas
-    const [dataResult, countResult] = await Promise.all([
-      this.databaseService.query(dataQuery, [...params, limit, offset]),
-      this.databaseService.query(countQuery, params),
-    ]);
+    const dataResult = await this.databaseService.query(dataQuery, [...params, limit, offset]);
+    const countResult = await this.databaseService.queryCount(countQuery, params);
 
     const users = dataResult.rows.map(row => this.mapToResponse(row, includeDetails));
-    const total = parseInt(countResult.rows[0].total);
+    const total = parseInt(countResult.rows[0].total as any as string);
 
-    return new PaginationResponseDto(users, total, page, limit);
+    return new PaginationResponseDto<UserResponse>(users, total, page, limit);
   }
 
   async findOne(id: string, currentUser: UserWithDetails): Promise<UserResponse> {
@@ -206,16 +204,16 @@ export class UsersService {
       WHERE u.id = $1
     `;
 
-    const { rows } = await this.databaseService.query(query, [id]);
+    const result = await this.databaseService.query(query, [id]);
 
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const user = rows[0];
+    const user = result.rows[0];
 
     // Control de acceso: Solo Super Admin puede ver usuarios de otras compañías
-    if (currentUser.role.name !== 'Super Admin' && user.company_id !== currentUser.company_id) {
+    if (currentUser.role.name !== 'Super Admin' && (user as UserResponse).companyId !== currentUser.company_id) {
       throw new ForbiddenException('No tienes permisos para ver este usuario');
     }
 
@@ -244,9 +242,9 @@ export class UsersService {
     // Verificar entidades relacionadas si se están actualizando
     if (personId) {
       const personQuery = 'SELECT id FROM persons WHERE id = $1 AND is_active = true';
-      const { rows: personRows } = await this.databaseService.query(personQuery, [personId]);
+      const personResult = await this.databaseService.query(personQuery, [personId]);
       
-      if (personRows.length === 0) {
+      if (personResult.rows.length === 0) {
         throw new NotFoundException('Persona no encontrada');
       }
 
@@ -259,18 +257,18 @@ export class UsersService {
 
     if (companyId) {
       const companyQuery = 'SELECT id FROM companies WHERE id = $1 AND is_active = true';
-      const { rows: companyRows } = await this.databaseService.query(companyQuery, [companyId]);
+      const companyResult = await this.databaseService.query(companyQuery, [companyId]);
       
-      if (companyRows.length === 0) {
+      if (companyResult.rows.length === 0) {
         throw new NotFoundException('Compañía no encontrada');
       }
     }
 
     if (roleId) {
       const roleQuery = 'SELECT id FROM roles WHERE id = $1 AND is_active = true';
-      const { rows: roleRows } = await this.databaseService.query(roleQuery, [roleId]);
+      const roleResult = await this.databaseService.query(roleQuery, [roleId]);
       
-      if (roleRows.length === 0) {
+      if (roleResult.rows.length === 0) {
         throw new NotFoundException('Rol no encontrado');
       }
     }
@@ -339,9 +337,9 @@ export class UsersService {
 
     params.push(id);
 
-    const { rows } = await this.databaseService.query(query, params);
+    const result = await this.databaseService.query(query, params);
 
-    return this.mapToResponse(rows[0]);
+    return this.mapToResponse(result.rows[0]);
   }
 
   async remove(id: string, currentUser: UserWithDetails): Promise<void> {
@@ -367,16 +365,15 @@ export class UsersService {
 
   private async findByUsername(username: string): Promise<User | null> {
     const query = 'SELECT * FROM users WHERE username = $1 AND is_active = true';
-    const { rows } = await this.databaseService.query(query, [username]);
-    return rows.length > 0 ? rows[0] : null;
+    const result = await this.databaseService.query(query, [username]);
+    return result.rows.length > 0 ? (result.rows[0] as User) : null;
   }
 
   private async findByPersonId(personId: string): Promise<User | null> {
     const query = 'SELECT * FROM users WHERE person_id = $1 AND is_active = true';
-    const { rows } = await this.databaseService.query(query, [personId]);
-    return rows.length > 0 ? rows[0] : null;
+    const result = await this.databaseService.query(query, [personId]);
+    return result.rows.length > 0 ? (result.rows[0] as User) : null;
   }
-
   private mapToResponse(row: any, includeDetails: boolean = false): UserResponse {
     const response: UserResponse = {
       id: row.id,
@@ -425,4 +422,5 @@ export class UsersService {
     return response;
   }
 }
+
 

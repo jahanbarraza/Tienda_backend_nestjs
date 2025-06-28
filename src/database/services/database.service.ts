@@ -1,66 +1,58 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Pool, PoolClient } from 'pg';
+
+interface CountResult {
+  total: string;
+}
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private pool: Pool;
 
-  constructor(private configService: ConfigService) {}
+  constructor() {
+    this.pool = new Pool({
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT || '5432'),
+      user: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+  }
 
   async onModuleInit() {
-    this.pool = new Pool({
-      host: this.configService.get('database.host'),
-      port: this.configService.get('database.port'),
-      user: this.configService.get('database.username'),
-      password: this.configService.get('database.password'),
-      database: this.configService.get('database.name'),
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
-    });
-
-    // Test connection
-    try {
-      const client = await this.pool.connect();
-      console.log('Database connected successfully');
-      client.release();
-    } catch (error) {
-      console.error('Database connection failed:', error);
-    }
+    await this.pool.connect();
+    console.log('Database connected');
   }
 
   async onModuleDestroy() {
     await this.pool.end();
+    console.log('Database connection closed');
   }
 
-  async query(text: string, params?: any[]): Promise<any> {
-    const client = await this.pool.connect();
-    try {
-      const result = await client.query(text, params);
-      return result;
-    } finally {
-      client.release();
-    }
+  async query<T>(text: string, params?: any[]): Promise<{ rows: T[] }> {
+    const result = await this.pool.query(text, params);
+    return { rows: result.rows as T[] };
   }
 
-  async getClient(): Promise<PoolClient> {
-    return this.pool.connect();
+  async queryCount(text: string, params?: any[]): Promise<{ rows: CountResult[] }> {
+    const result = await this.pool.query(text, params);
+    return { rows: result.rows as CountResult[] };
   }
 
   async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
     const client = await this.pool.connect();
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
       const result = await callback(client);
-      await client.query('COMMIT');
+      await client.query("COMMIT");
       return result;
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
     }
   }
 }
+
 

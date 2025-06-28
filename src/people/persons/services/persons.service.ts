@@ -140,11 +140,11 @@ export class PersonsService {
     // Ejecutar consultas
     const [dataResult, countResult] = await Promise.all([
       this.databaseService.query(dataQuery, [...params, limit, offset]),
-      this.databaseService.query(countQuery, params),
+      this.databaseService.queryCount(countQuery, params),
     ]);
 
     const persons = dataResult.rows.map(row => this.mapToResponse(row, includeIdentificationType, includeStats));
-    const total = parseInt(countResult.rows[0].total);
+    const total = parseInt(countResult.rows[0].total as any as string);
 
     return new PaginationResponseDto(persons, total, page, limit);
   }
@@ -290,7 +290,7 @@ export class PersonsService {
 
     const { rows } = await this.databaseService.query(checkQuery, [id]);
     
-    if (parseInt(rows[0].users_count) > 0) {
+    if (parseInt((rows[0] as any).users_count) > 0) {
       throw new ConflictException('No se puede eliminar la persona porque tiene usuarios asociados');
     }
 
@@ -304,7 +304,7 @@ export class PersonsService {
   private async findByIdentification(identificationTypeId: string, identificationNumber: string): Promise<Person | null> {
     const query = 'SELECT * FROM persons WHERE identification_type_id = $1 AND identification_number = $2 AND is_active = true';
     const { rows } = await this.databaseService.query(query, [identificationTypeId, identificationNumber]);
-    return rows.length > 0 ? rows[0] : null;
+    return rows.length > 0 ? (rows[0] as Person) : null;
   }
 
   private mapToResponse(row: any, includeIdentificationType: boolean = false, includeStats: boolean = false): PersonResponse {
