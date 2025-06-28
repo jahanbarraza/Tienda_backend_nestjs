@@ -500,3 +500,4 @@ companies (1) -----> (N) users <----- (N) roles
 
 El módulo de Gestión de Personas proporciona una base sólida y escalable para la gestión de recursos humanos en el sistema StampOut POS. Con su arquitectura modular, validaciones robustas y sistema de seguridad avanzado, permite un control granular de usuarios y permisos mientras mantiene la flexibilidad necesaria para adaptarse a diferentes necesidades organizacionales.
 
+Todo Probado y ok 
