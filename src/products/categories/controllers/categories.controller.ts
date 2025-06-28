@@ -1,41 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { QueryCategoryDto } from '../dto/query-category.dto';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { User } from '../../../people/users/interfaces/user.interface';
 
+@Controller('products/categories')
 @UseGuards(JwtAuthGuard)
-@Controller("products/categories")
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto, @CurrentUser() user: User) {
-    return this.categoriesService.create(createCategoryDto, user.company_id);
+  create(@Body() createCategoryDto: CreateCategoryDto, @Request() req) {
+    return this.categoriesService.create(createCategoryDto, req.user.companyId);
   }
 
   @Get()
-  findAll(@Query() query: QueryCategoryDto, @CurrentUser() user: User) {
-    return this.categoriesService.findAll(query, user.company_id);
+  findAll(@Query() queryDto: QueryCategoryDto, @Request() req) {
+    return this.categoriesService.findAll(queryDto, req.user.companyId);
   }
 
-  @Get(":id")
-  findOne(@Param("id") id: string, @CurrentUser() user: User) {
-    return this.categoriesService.findOne(id, user.company_id);
+  @Get(':id')
+  findOne(@Param('id') id: string, @Request() req) {
+    return this.categoriesService.findOne(id, req.user.companyId);
   }
 
-  @Patch(":id")
-  update(@Param("id") id: string, @Body() updateCategoryDto: UpdateCategoryDto, @CurrentUser() user: User) {
-    return this.categoriesService.update(id, updateCategoryDto, user.company_id);
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Request() req,
+  ) {
+    return this.categoriesService.update(id, updateCategoryDto, req.user.companyId);
   }
 
-  @Delete(":id")
-  remove(@Param("id") id: string, @CurrentUser() user: User) {
-    return this.categoriesService.remove(id, user.company_id);
+  @Delete(':id')
+  remove(@Param('id') id: string, @Request() req) {
+    return this.categoriesService.remove(id, req.user.companyId);
   }
 }
-
 

@@ -1,11 +1,15 @@
 const axios = require("axios");
 
-const BASE_URL = "http://localhost:3000/api"; // Added /api prefix
-const AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyYjQ2YjEwMC02YmY2LTQxYjctYmU2NS0xYjYxY2Y2YmY1YjEiLCJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzE5NTk0MjQ1LCJleHAiOjE3MTk2ODA2NDUsImNvbXBhbnlfaWQiOiJjZjk2YjEwMC02YmY2LTQxYjctYmU2NS0xYjYxY2Y2YmY1YjEifQ.YOUR_JWT_TOKEN_HERE"; // Reemplazar con un token JWT válido
+const BASE_URL = "http://localhost:3001/api"; // Added /api prefix
+const AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiYjJjZDIyNy1iNzllLTRmNDEtYmMzYS1mOGY0ODRhYTUzNDciLCJ1c2VybmFtZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbjFAc3RhbXBvdXRwb3MuY29tIiwiY29tcGFueUlkIjoiMmQ4OTY5MDgtNDA5Zi00MTA3LWFmN2EtYmRjNDVlNjEwZGI1Iiwicm9sZUlkIjoiM2ZiNjE1MDctNjIxYy00ZmYwLWEzYjEtNDRhOGE5NTJmYmYyIiwicm9sZU5hbWUiOiJTdXBlciBBZG1pbiIsImlhdCI6MTc1MTEzMDI2MCwiZXhwIjoxNzUxMjE2NjYwfQ.A_UpOcB7xp_qKlGZ8atxIYnTLb48QwSveYXGhrJ0mUs"; // Reemplazar con un token JWT válido
+
+console.log('AUTH_TOKEN:', AUTH_TOKEN);
 
 const headers = {
   Authorization: `Bearer ${AUTH_TOKEN}`,
 };
+
+console.log('Headers:', headers);
 
 async function testCategories() {
   console.log("\n--- Testing Categories Endpoints ---");

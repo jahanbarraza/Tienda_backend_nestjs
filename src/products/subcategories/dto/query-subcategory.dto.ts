@@ -1,22 +1,20 @@
-import { IsString, IsOptional, IsBoolean, IsNumberString } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsUUID } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 
 export class QuerySubcategoryDto extends PaginationDto {
-  @IsString()
   @IsOptional()
+  @IsString()
+  @IsUUID()
+  category_id?: string;
+
+  @IsOptional()
+  @IsString()
   name?: string;
 
+  @IsOptional()
+  @Transform(({ value }) => value === 'true')
   @IsBoolean()
-  @IsOptional()
   is_active?: boolean;
-
-  @IsNumberString()
-  @IsOptional()
-  category_id?: number;
-
-  @IsNumberString()
-  @IsOptional()
-  company_id?: number;
 }
-
 

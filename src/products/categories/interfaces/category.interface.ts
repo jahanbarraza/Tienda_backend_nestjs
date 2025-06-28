@@ -1,6 +1,6 @@
 export interface Category {
-  id: number;
-  company_id: number;
+  id: string;
+  company_id: string;
   name: string;
   description?: string;
   is_active: boolean;

@@ -7,8 +7,7 @@ import { DatabaseModule } from '../../database/database.module';
   imports: [DatabaseModule],
   controllers: [SubcategoriesController],
   providers: [SubcategoriesService],
-  exports: [SubcategoriesService]
+  exports: [SubcategoriesService],
 })
 export class SubcategoriesModule {}
-
 

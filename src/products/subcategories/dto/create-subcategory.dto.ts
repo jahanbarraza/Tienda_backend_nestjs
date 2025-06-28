@@ -1,9 +1,10 @@
-import { IsString, IsNotEmpty, MaxLength, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, MaxLength, IsUUID } from 'class-validator';
 
 export class CreateSubcategoryDto {
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  category_id: number;
+  @IsUUID()
+  category_id: string;
 
   @IsString()
   @IsNotEmpty()
@@ -12,11 +13,7 @@ export class CreateSubcategoryDto {
 
   @IsString()
   @IsOptional()
-  @MaxLength(255)
+  @MaxLength(500)
   description?: string;
-
-  @IsBoolean()
-  @IsOptional()
-  is_active?: boolean;
 }
 
