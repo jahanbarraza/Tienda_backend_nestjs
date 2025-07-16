@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import './common/interfaces/request.interface'; // Importar la interfaz extendida
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,4 +32,5 @@ async function bootstrap() {
   console.log(`StampOut POS Backend running on: http://0.0.0.0:${port}`);
 }
 bootstrap();
+
 
